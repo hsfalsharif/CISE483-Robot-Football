@@ -7,23 +7,24 @@ class CMD:
 		self.des = ""
 		self.point = Position(0, 0)
 		self.next_point = Position(0, 0)
-		self.kick_speedX = 0
-		self.kick_speedZ = 0
-		self.vel_tangent = 0
-		self.vel_normal = 0
-		self.vel_angular = 0
+		self.kickspeedx = 0
+		self.kickspeedz = 0
+		self.veltangent = 0
+		self.velnormal = 0
+		self.velangular = 0
 		self.spinner = 0
-		self.wheels_speed = 0
+		self.wheelsspeed = 0
 		self.wheel1 = 0
 		self.wheel2 = 0
 		self.wheel3 = 0
 		self.wheel4 = 0
 		self.timeout = 0
+		self.isteamyellow = True
 
 	def velocity(self, x, y, angle):
-		self.vel_tangent = x
-		self.vel_normal = y
-		self.vel_angular = angle
+		self.veltangent = x
+		self.velnormal = y
+		self.velangular = angle
 
 	def getx(self):
 		return self.point.x + 0

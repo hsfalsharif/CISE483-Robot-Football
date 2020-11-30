@@ -39,18 +39,18 @@ class Network:
 	def send_packet(self, data):
 		packet = grSim_Packet_pb2.grSim_Packet()
 		packet.commands.timestamp = data.timestamp
-		packet.commands.is_team_yellow = data.isteamyellow
+		packet.commands.isteamyellow = data.isteamyellow
 
 		for i in data.robots_commands:
 			command = grSim_Commands_pb2.grSim_Robot_Command()
 			command.id = i.robotID
-			command.kick_speedX = i.kick_speedX
-			command.kick_speedZ = i.kick_speedZ
-			command.vel_tangent = i.vel_tangent
-			command.vel_normal = i.vel_normal
-			command.vel_angular = i.vel_angular
+			command.kickspeedx = i.kickspeedx
+			command.kickspeedz = i.kickspeedz
+			command.veltangent = i.veltangent
+			command.velnormal = i.velnormal
+			command.velangular = i.velangular
 			command.spinner = i.spinner
-			command.wheels_speed = i.wheels_speed
+			command.wheelsspeed = i.wheelsspeed
 			command.wheel1 = i.wheel1
 			command.wheel2 = i.wheel2
 			command.wheel3 = i.wheel3

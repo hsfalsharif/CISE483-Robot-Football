@@ -57,21 +57,21 @@ class Packet:
 
 class SPacket:
     timestamp = 0
-    is_team_yellow = 0
+    isteamyellow = 0
     robots_commands = []
 
-    def __init__(self, timestamp, is_team_yellow, robots_array):
+    def __init__(self, timestamp, isteamyellow, robots_array):
         self.timestamp = timestamp
-        self.is_team_yellow = is_team_yellow
+        self.isteamyellow = isteamyellow
         self.robots_commands = robots_array
 
     def to_string(self):
-        str = "Timestamp : {0} \nisYellow : {1}\n".format(self.timestamp, self.is_team_yellow)
+        str = "Timestamp : {0} \nisYellow : {1}\n".format(self.timestamp, self.isteamyellow)
         for i in self.robots_commands:
-            str += "id:{0} , \n\tkick_speedX:{1} , \n\tkick_speedY:{2} , \n\tvel_tangent:{3} , \n\tvel_normal:{4} , " \
-                   "\n\tvel_angular:{5}, \n\tspinner:{6} , \n\twheels_speed:{7} , \n\twheel1:{8} , \n\twheel2:{9} , " \
-                   "\n\twheel3:{10} , \n\twheel4:{11}\n\n".format(i.robotID, i.kick_speedX, i.kick_speedZ,
-                                                                  i.vel_tangent, i.vel_normal, i.vel_angular, i.spinner,
-                                                                  i.wheels_speed, i.wheel1, i.wheel2, i.wheel3,
+            str += "id:{0} , \n\tkickspeedx:{1} , \n\tkick_speedY:{2} , \n\tveltangent:{3} , \n\tvelnormal:{4} , " \
+                   "\n\tvelangular:{5}, \n\tspinner:{6} , \n\twheelsspeed:{7} , \n\twheel1:{8} , \n\twheel2:{9} , " \
+                   "\n\twheel3:{10} , \n\twheel4:{11}\n\n".format(i.robotID, i.kickspeedx, i.kickspeedz,
+                                                                  i.veltangent, i.velnormal, i.velangular, i.spinner,
+                                                                  i.wheelsspeed, i.wheel1, i.wheel2, i.wheel3,
                                                                   i.wheel4)
         return str
