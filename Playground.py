@@ -35,6 +35,7 @@ class Playground:
 		# update Yellow team position and angle
 		self.obsticals = []
 		for i in p.info_robotY:
+			print("robot_id : {0}".format(i.id))
 			self.robotYellow[i.id].position.x = i.x
 			self.robotYellow[i.id].position.y = i.y
 			self.robotYellow[i.id].orientation = i.orientation
