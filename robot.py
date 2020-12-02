@@ -85,8 +85,8 @@ class Robot:
         lv = self.world_to_local([vx,vy])
         final_v = self.world_to_local(self.target_velocity)
         magnitude = self.vector_mag(lv)
-        lvxu = lv[0]/magnitude
-        lvyu = lv[1]/magnitude
+        lvxu = safe_division(lv[0],magnitude)
+        lvyu = safe_division(lv[1],magnitude)
         d = self.distance_to_point(goal)
         print("path :{0}\nWorld Velocity:{1} Local Velocity:{2}".format(first_segment,[vx,vy],[lvxu * d,lvyu * d]))
         print("Computed path : {0}".format(path))
@@ -147,6 +147,9 @@ class Robot:
         
         
         return False
+
+def safe_division(self,n, d):
+    return n / d if d else 0
 
 
     def get_sub_goal(self,l,o,margin):
