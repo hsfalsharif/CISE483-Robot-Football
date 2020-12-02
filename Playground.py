@@ -35,16 +35,16 @@ class Playground:
 		# update Yellow team position and angle
 		self.obsticals = []
 		for i in p.info_robotY:
-			self.robotYellow[i.id - 1].position.x = i.x
-			self.robotYellow[i.id - 1].position.y = i.y
-			self.robotYellow[i.id - 1].orientation = i.orientation
+			self.robotYellow[i.id].position.x = i.x
+			self.robotYellow[i.id].position.y = i.y
+			self.robotYellow[i.id].orientation = i.orientation
 			self.obsticals.append([i.x,i.y,0.0875])
 
 		# update Blue team position and angle
 		for i in p.info_robotB:
-			self.robotBlue[i.id - 1].position.x = i.x
-			self.robotBlue[i.id - 1].position.y = i.y
-			self.robotBlue[i.id - 1].orientation = i.orientation
+			self.robotBlue[i.id].position.x = i.x
+			self.robotBlue[i.id].position.y = i.y
+			self.robotBlue[i.id].orientation = i.orientation
 			self.obsticals.append([i.x,i.y,0.0875])
 		
 		for r in self.robotYellow :
