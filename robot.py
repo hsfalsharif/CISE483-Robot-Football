@@ -81,11 +81,14 @@ class Robot:
         first_segment = [path[0],path[1]]
         vx = first_segment[1][0] - first_segment[0][0]
         vy = first_segment[1][1] - first_segment[0][1]
-        print("path :{0}".format(first_segment))
         lv = self.world_to_local([vx,vy])
-
-        self.veltangent = lv[0]
-        self.velnormal = lv[1]
+        magnitude = self.vector_mag(lv)
+        lvxu = lv[0]/magnitude
+        lvyu = lv[1]/magnitude
+        print("path :{0}\nWorld Velocity:{1} Local Velocity:{2}".format(first_segment,lv,[lvxu,lvyu]))
+        d = self.distance_to_point(goal)
+        self.veltangent = lvxu * d
+        self.velnormal = lvyu * d
 
 
     def local_to_world(self,vec):
@@ -100,6 +103,8 @@ class Robot:
         vy = -vec[0]*sin(o) + vec[1]*cos(o)
         return [vx,vy]
 
+    def distance_to_point(self,endp):
+        return sqrt((self.position.x-endp[0])**2+(self.position.y - endp[1])**2)
 
     def distance_from_path(self):
         x0 = self.position.x
@@ -113,6 +118,8 @@ class Robot:
         distance = abs((y1-y2)*x0+(x2-x1)*y0+x1*y2-x2*y1)/sqrt((x2-x1)**2+(y2-y1)**2)
         return distance
 
+    def vector_mag(self,vec):
+        return sqrt(vec[0]**2+vec[1]**2)
 
     def overlap(self,l , c):
         x0 = c[0]
