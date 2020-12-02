@@ -11,7 +11,7 @@ class Playground:
 	net = Network()
 	robotYellow = []
 	robotBlue = []
-
+	obsticals = []
 	coachYellow = "null"
 	coachBlue = "null"
 
@@ -21,7 +21,7 @@ class Playground:
 
 		for i in range(7):
 			self.robotYellow.append(Robot(i, Position(0, 0)))
-
+		
 	def update(self):
 		# receive new packet
 		self.net.update()
@@ -37,12 +37,21 @@ class Playground:
 			self.robotYellow[i.id - 1].position.x = i.x
 			self.robotYellow[i.id - 1].position.y = i.y
 			self.robotYellow[i.id - 1].orientation = i.orientation
+			self.obsticals.append([i.x,i.y,0.0875])
 
 		# update Blue team position and angle
 		for i in p.info_robotB:
 			self.robotBlue[i.id - 1].position.x = i.x
 			self.robotBlue[i.id - 1].position.y = i.y
 			self.robotBlue[i.id - 1].orientation = i.orientation
+			self.obsticals.append([i.x,i.y,0.0875])
+		
+		for r in self.robotYellow :
+			r.obsticals = self.obsticals
+		
+		for r in self.robotBlue :
+			r.obsticals = self.obsticals
+
 
 		####
 		# test sending command to robots
