@@ -85,8 +85,9 @@ class Robot:
         magnitude = self.vector_mag(lv)
         lvxu = lv[0]/magnitude
         lvyu = lv[1]/magnitude
-        print("path :{0}\nWorld Velocity:{1} Local Velocity:{2}".format(first_segment,lv,[lvxu,lvyu]))
         d = self.distance_to_point(goal)
+        print("path :{0}\nWorld Velocity:{1} Local Velocity:{2}".format(first_segment,lv,[lvxu * d,lvyu * d]))
+
         self.veltangent = lvxu * d
         self.velnormal = lvyu * d
 
