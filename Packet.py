@@ -17,11 +17,11 @@ class Packet:
             self.t_sent = parser.detection.t_sent
             self.camera_id = parser.detection.camera_id
             for i in parser.detection.balls:
-                self.info_ball = InfoBall(i.confidence, i.x, i.y, i.z)
+                self.info_ball = InfoBall(i.confidence, i.x/1000, i.y/1000, i.z/1000)
             for i in parser.detection.robots_yellow:
-                self.info_robotY.append(InfoRobot(i.robot_id, i.confidence, i.x, i.y, i.orientation))
+                self.info_robotY.append(InfoRobot(i.robot_id, i.confidence, i.x/1000, i.y/1000, i.orientation))
             for i in parser.detection.robots_blue:
-                self.info_robotB.append(InfoRobot(i.robot_id, i.confidence, i.x, i.y, i.orientation))
+                self.info_robotB.append(InfoRobot(i.robot_id, i.confidence, i.x/1000, i.y/1000, i.orientation))
 
             pass
         if parser.geometry.IsInitialized():
