@@ -23,7 +23,7 @@ class Robot:
     planned_path = []
     current_path_segment = []
     target_postion = Position(0, 0)
-    target_velocity = [0.5,0]
+    target_velocity = [0,0]
     current_state = None
     next_state = None
     next_sub_state = None
@@ -89,7 +89,7 @@ class Robot:
         lvyu = lv[1]/magnitude
         d = self.distance_to_point(goal)
         print("path :{0}\nWorld Velocity:{1} Local Velocity:{2}".format(first_segment,[vx,vy],[lvxu * d,lvyu * d]))
-
+        print("Computed path : {0}".format(path))
         self.veltangent = final_v[0] + lvxu * d
         self.velnormal = final_v[0]  + lvyu * d
 
@@ -197,8 +197,8 @@ class Robot:
         path = []
         line = [[s[0],s[1]],[g[0],g[1]]]
         obstical = self.get_obsticals(line,env) 
-        if obstical and i < 10 :
-            sub_goal = self.get_sub_goal(line,obstical,3)
+        if obstical and i < 50 :
+            sub_goal = self.get_sub_goal(line,obstical,0.5)
             #print("Create sub-goal at {0} to avoid {1}".format(sub_goal,obstical))
         # add_sub_goal(sub_goal)
             path_part1 = self.planner(s,sub_goal,env,i+1)

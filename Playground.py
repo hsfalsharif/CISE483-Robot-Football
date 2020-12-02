@@ -47,7 +47,7 @@ class Playground:
 			self.robotBlue[i.id].position.x = i.x
 			self.robotBlue[i.id].position.y = i.y
 			self.robotBlue[i.id].orientation = i.orientation
-			self.obsticals.append([i.x,i.y,0.0875])
+			self.obsticals.append([i.x,i.y,0.1])
 			self.robotBlue[i.id].ball = self.ball
 
 		
