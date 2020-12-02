@@ -148,8 +148,8 @@ class Robot:
         
         return False
 
-def safe_division(self,n, d):
-    return n / d if d else 0
+    def safe_division(self,n, d):
+        return n / d if d else 0
 
 
     def get_sub_goal(self,l,o,margin):
