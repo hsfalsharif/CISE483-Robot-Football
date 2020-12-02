@@ -16,10 +16,10 @@ class Playground:
 	coachBlue = "null"
 
 	def __init__(self):
-		for i in range(7):
+		for i in range(8):
 			self.robotBlue.append(Robot(i, Position(0, 0)))
 
-		for i in range(7):
+		for i in range(8):
 			self.robotYellow.append(Robot(i, Position(0, 0)))
 		
 	def update(self):
