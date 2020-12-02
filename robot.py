@@ -175,6 +175,8 @@ class Robot:
 
     def get_obsticals(self,l,env):
         for o in env:
+            if o[0] == self.position.x and o[1] == self.position.y:
+                continue
             if self.overlap(l,o):
                 print("get_obstical : line ({0},{1}),({2},{3}) overlap with ({4},{5})".format(l[0][0],l[0][1],l[1][0],l[1][1],o[0],o[1]))
                 return o
