@@ -80,9 +80,10 @@ class Robot:
         first_segment = [path[0],path[1]]
         vx = first_segment[1][0] - first_segment[0][0]
         vy = first_segment[1][1] - first_segment[0][1]
-        
-        self.veltangent = vx
-        self.velnormal = vy
+        lv = self.world_to_local([vx,vy])
+
+        self.veltangent = lv[0]
+        self.velnormal = lv[1]
 
 
     def local_to_world(self,vec):
