@@ -9,7 +9,7 @@ class InfoRobot:
         self.orientation = orientation
 
     def to_string(self):
-        return "Robot(id:{0}) : ({1} , {2}) ~ {3} orientation : {4}".format(self.id, self.y, self.x, self.confidence,
+        return "Robot(id:{0}) : ({1} , {2}) ~ {3} orientation : {4}".format(self.id, self.x, self.y, self.confidence,
                                                                             self.orientation)
 
 

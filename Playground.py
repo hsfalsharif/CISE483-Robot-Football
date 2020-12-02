@@ -33,6 +33,7 @@ class Playground:
 		self.ball.z = p.info_ball.z
 
 		# update Yellow team position and angle
+		self.obsticals = []
 		for i in p.info_robotY:
 			self.robotYellow[i.id - 1].position.x = i.x
 			self.robotYellow[i.id - 1].position.y = i.y

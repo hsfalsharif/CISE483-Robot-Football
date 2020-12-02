@@ -47,9 +47,10 @@ class Robot:
 
     def update(self):
         # is robot on path ??
-        self.target_postion.x = 3
-        self.target_postion.y = 2
-        self.move_to()
+        self.target_postion.x = 0
+        self.target_postion.y = 0
+        if self.robotID == 2:
+            self.move_to()
         # re-adjust velocities
         #self.do_command(self.commands)
 
@@ -80,6 +81,7 @@ class Robot:
         first_segment = [path[0],path[1]]
         vx = first_segment[1][0] - first_segment[0][0]
         vy = first_segment[1][1] - first_segment[0][1]
+        print("path :{0}".format(first_segment))
         lv = self.world_to_local([vx,vy])
 
         self.veltangent = lv[0]
@@ -153,7 +155,7 @@ class Robot:
         # point of intersection
         xi = (pb-b)/(m-pm)
         yi = m*xi + b
-        print("line : {0}x+{1} \nperp: {2}x+{3}".format(m,b,pm,pb))
+        #print("line : {0}x+{1} \nperp: {2}x+{3}".format(m,b,pm,pb))
         # unit vector parallel to the perpendicular line 
         #vx = xi-x3
         #if vx == 0:
@@ -164,7 +166,7 @@ class Robot:
         mag = sqrt(vx**2 + vy**2)
         vx /= mag
         vy /= mag
-        print("point of intersection is {0} ".format([xi,yi]))
+        #print("point of intersection is {0} ".format([xi,yi]))
         
         xsg = xi + margin * vx
         ysg = yi + margin * vy
@@ -182,11 +184,10 @@ class Robot:
     def planner(self,s,g,env,i):
         path = []
         line = [[s[0],s[1]],[g[0],g[1]]]
-        print(i)
         obstical = self.get_obsticals(line,env) 
         if obstical and i < 10 :
             sub_goal = self.get_sub_goal(line,obstical,3)
-            print("Create sub-goal at {0} to avoid {1}".format(sub_goal,obstical))
+            #print("Create sub-goal at {0} to avoid {1}".format(sub_goal,obstical))
         # add_sub_goal(sub_goal)
             path_part1 = self.planner(s,sub_goal,env,i+1)
             
