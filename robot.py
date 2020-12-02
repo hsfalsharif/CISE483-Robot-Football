@@ -17,11 +17,13 @@ class Robot:
     wheel2 = 0
     wheel3 = 0
     wheel4 = 0
+    ball = Position(0,0)
     commands = []
     obsticals = []
     planned_path = []
     current_path_segment = []
     target_postion = Position(0, 0)
+    target_velocity = [0.5,0]
     current_state = None
     next_state = None
     next_sub_state = None
@@ -47,8 +49,8 @@ class Robot:
 
     def update(self):
         # is robot on path ??
-        self.target_postion.x = 0
-        self.target_postion.y = 0
+        self.target_postion.x = self.ball.x
+        self.target_postion.y = self.ball.y
         if self.robotID == 2:
             self.move_to()
         # re-adjust velocities
@@ -76,20 +78,20 @@ class Robot:
     def move_to(self):
         origin = [self.position.x,self.position.y]
         goal = [self.target_postion.x,self.target_postion.y]
-
         path = self.planner(origin,goal,self.obsticals,0)
         first_segment = [path[0],path[1]]
         vx = first_segment[1][0] - first_segment[0][0]
         vy = first_segment[1][1] - first_segment[0][1]
         lv = self.world_to_local([vx,vy])
+        final_v = self.world_to_local(self.target_velocity)
         magnitude = self.vector_mag(lv)
         lvxu = lv[0]/magnitude
         lvyu = lv[1]/magnitude
         d = self.distance_to_point(goal)
         print("path :{0}\nWorld Velocity:{1} Local Velocity:{2}".format(first_segment,[vx,vy],[lvxu * d,lvyu * d]))
 
-        self.veltangent = lvxu * d
-        self.velnormal = lvyu * d
+        self.veltangent = final_v[0] + lvxu * d
+        self.velnormal = final_v[0]  + lvyu * d
 
 
     def local_to_world(self,vec):
