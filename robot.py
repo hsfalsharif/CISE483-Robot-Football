@@ -1,6 +1,6 @@
 from Commands import CMD
 from position import Position
-from math import  sqrt
+from math import  sqrt,cos,sin
 
 class Robot:
     robotID = 0
@@ -47,9 +47,11 @@ class Robot:
 
     def update(self):
         # is robot on path ??
+        self.target_postion.x = 3
+        self.target_postion.y = 2
         self.move_to()
         # re-adjust velocities
-        self.do_command(self.commands)
+        #self.do_command(self.commands)
 
     def do_command(self, cmd):
         self.wheelsspeed = cmd.wheelsspeed
@@ -78,12 +80,22 @@ class Robot:
         first_segment = [path[0],path[1]]
         vx = first_segment[1][0] - first_segment[0][0]
         vy = first_segment[1][1] - first_segment[0][1]
-
+        
         self.veltangent = vx
         self.velnormal = vy
 
 
-
+    def local_to_world(self,vec):
+        o = self.orientation
+        vx = vec[0]*cos(o) - vec[1]*sin(o)
+        vy = vec[0]*sin(o) + vec[1]*cos(o)
+        return [vx,vy]
+    
+    def world_to_local(self,vec):
+        o = self.orientation
+        vx = vec[0]*cos(o) + vec[1]*sin(o)
+        vy = -vec[0]*sin(o) + vec[1]*cos(o)
+        return [vx,vy]
 
 
     def distance_from_path(self):
