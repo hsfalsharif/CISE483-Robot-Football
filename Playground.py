@@ -4,6 +4,12 @@ from robot import Robot
 from position import Position
 from Packet import SPacket
 from Commands import CMD
+import glfw
+import OpenGL.GL as gl
+
+import imgui
+from imgui.integrations.glfw import GlfwRenderer
+
 
 
 class Playground:
@@ -14,8 +20,14 @@ class Playground:
 	obsticals = []
 	coachYellow = "null"
 	coachBlue = "null"
+	window =None
+	impl = None
 
 	def __init__(self):
+		imgui.create_context()
+		self.window = self.impl_glfw_init()
+		self.impl = GlfwRenderer(self.window)
+
 		for i in range(8):
 			self.robotBlue.append(Robot(i, Position(0, 0)))
 
@@ -87,3 +99,84 @@ class Playground:
 		# print(next_command_Y.to_string())
 		next_command_b = SPacket(0, 0, self.robotBlue)
 		self.net.send_packet(next_command_b)
+
+		if  glfw.window_should_close(self.window):
+			self.impl.shutdown()
+			glfw.terminate()
+		glfw.poll_events()
+		self.impl.process_inputs()
+
+		imgui.new_frame()
+
+		if imgui.begin_main_menu_bar():
+			if imgui.begin_menu("File", True):
+
+				clicked_quit, selected_quit = imgui.menu_item(
+					"Quit", 'Cmd+Q', False, True
+				)
+
+				if clicked_quit:
+					exit(1)
+
+				imgui.end_menu()
+			imgui.end_main_menu_bar()
+
+		imgui.show_test_window()
+
+		imgui.begin("Custom window", True)
+		draw_list = imgui.get_window_draw_list()
+		draw_list.add_circle_filled(100, 60, 30, imgui.get_color_u32_rgba(1,1,0,1))
+
+
+		imgui.end()
+
+		imgui.begin("Filled circle example")
+		draw_list = imgui.get_window_draw_list()
+		draw_list.add_circle_filled(100, 60, 30, imgui.get_color_u32_rgba(1,1,0,1))
+		imgui.end()
+
+
+		imgui.begin("Circle example")
+		draw_list = imgui.get_window_draw_list()
+		draw_list.add_circle(100, 60, 30, imgui.get_color_u32_rgba(1,1,0,1), thickness=3)
+		imgui.end()
+
+		gl.glClearColor(1., 1., 1., 1)
+		gl.glClear(gl.GL_COLOR_BUFFER_BIT)
+
+		imgui.render()
+		self.impl.render(imgui.get_draw_data())
+		glfw.swap_buffers(self.window)
+
+
+
+
+
+
+	def impl_glfw_init(self):
+		width, height = 1280, 720
+		window_name = "minimal ImGui/GLFW3 example"
+
+		if not glfw.init():
+			print("Could not initialize OpenGL context")
+			exit(1)
+
+		# OS X supports only forward-compatible core profiles from 3.2
+		glfw.window_hint(glfw.CONTEXT_VERSION_MAJOR, 3)
+		glfw.window_hint(glfw.CONTEXT_VERSION_MINOR, 3)
+		glfw.window_hint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
+
+		glfw.window_hint(glfw.OPENGL_FORWARD_COMPAT, gl.GL_TRUE)
+
+		# Create a windowed mode window and its OpenGL context
+		window = glfw.create_window(
+			int(width), int(height), window_name, None, None
+		)
+		glfw.make_context_current(window)
+
+		if not window:
+			glfw.terminate()
+			print("Could not initialize Window")
+			exit(1)
+
+		return window
