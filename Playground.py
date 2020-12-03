@@ -22,7 +22,8 @@ class Playground:
 	coachBlue = "null"
 	window =None
 	impl = None
-
+	width = 0
+	height = 0
 	def __init__(self):
 		imgui.create_context()
 		self.window = self.impl_glfw_init()
@@ -40,9 +41,10 @@ class Playground:
 		p = self.net.get_packet()
 		print(p.to_string())
 		# update ball position
-		self.ball.x = p.info_ball.x
-		self.ball.y = p.info_ball.y
-		self.ball.z = p.info_ball.z
+		if p.info_ball.confidence > 0.5:
+			self.ball.x = p.info_ball.x
+			self.ball.y = p.info_ball.y
+			self.ball.z = p.info_ball.z
 
 		# update Yellow team position and angle
 		self.obsticals = []
@@ -121,25 +123,36 @@ class Playground:
 				imgui.end_menu()
 			imgui.end_main_menu_bar()
 
-		imgui.show_test_window()
 
-		imgui.begin("Custom window", True)
+		imgui.begin("Filled circle example",)
 		draw_list = imgui.get_window_draw_list()
-		draw_list.add_circle_filled(100, 60, 30, imgui.get_color_u32_rgba(1,1,0,1))
-
-
+		for i in self.robotYellow:
+			dx = 5.5 - i.position.x
+			dy = 7 - i.position.y
+			draw_list.add_circle_filled( dx*600/11.0,dy*800/14 ,4, imgui.get_color_u32_rgba(1,1,0,1))
+			for l in range(len(i.planned_path)-1):
+				x0 = 5.5 - i.planned_path[l][0]
+				y0 = 7 - i.planned_path[l][1]
+				x1 = 5.5 - i.planned_path[l+1][0]
+				y1 = 7 - i.planned_path[l+1][1]
+				print("path : {0} {1}".format([x0,y0],[x1,y1]))
+				draw_list.add_line(x0*600/11.0, y0*800/14 , x1*600/11.0, y1*800/14 , imgui.get_color_u32_rgba(1,1,0,1), 2)
+		
+		for i in self.robotBlue:
+			dx = 5.5 - i.position.x
+			dy = 7 - i.position.y
+			draw_list.add_circle_filled( dx*600/11.0,dy*800/14 ,4, imgui.get_color_u32_rgba(0,0,1,1))
+			for l in range(len(i.planned_path)-1):
+				x0 = 5.5 - i.planned_path[l][0]
+				y0 = 7 - i.planned_path[l][1]
+				x1 = 5.5 - i.planned_path[l+1][0]
+				y1 = 7 - i.planned_path[l+1][1]
+				print("path : {0} {1}".format([x0,y0],[x1,y1]))
+				draw_list.add_line(x0*600/11.0, y0*800/14 , x1*600/11.0, y1*800/14 , imgui.get_color_u32_rgba(0,0,1,1), 1)
 		imgui.end()
 
-		imgui.begin("Filled circle example")
-		draw_list = imgui.get_window_draw_list()
-		draw_list.add_circle_filled(100, 60, 30, imgui.get_color_u32_rgba(1,1,0,1))
-		imgui.end()
 
 
-		imgui.begin("Circle example")
-		draw_list = imgui.get_window_draw_list()
-		draw_list.add_circle(100, 60, 30, imgui.get_color_u32_rgba(1,1,0,1), thickness=3)
-		imgui.end()
 
 		gl.glClearColor(1., 1., 1., 1)
 		gl.glClear(gl.GL_COLOR_BUFFER_BIT)
@@ -154,7 +167,7 @@ class Playground:
 
 
 	def impl_glfw_init(self):
-		width, height = 1280, 720
+		self.width, self.height = 440, 840
 		window_name = "minimal ImGui/GLFW3 example"
 
 		if not glfw.init():
@@ -170,7 +183,7 @@ class Playground:
 
 		# Create a windowed mode window and its OpenGL context
 		window = glfw.create_window(
-			int(width), int(height), window_name, None, None
+			int(self.width), int(self.height), window_name, None, None
 		)
 		glfw.make_context_current(window)
 

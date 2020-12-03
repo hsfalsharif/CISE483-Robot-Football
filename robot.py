@@ -21,6 +21,7 @@ class Robot:
     commands = []
     obsticals = []
     planned_path = []
+    max_velocity = 0.25
     current_path_segment = []
     target_postion = Position(0, 0)
     target_velocity = [0,0]
@@ -51,7 +52,7 @@ class Robot:
         # is robot on path ??
         self.target_postion.x = self.ball.x
         self.target_postion.y = self.ball.y
-        if self.robotID == 2:
+        if self.robotID == 2 and self.target_postion.x != None:
             self.move_to()
         # re-adjust velocities
         #self.do_command(self.commands)
@@ -79,6 +80,7 @@ class Robot:
         origin = [self.position.x,self.position.y]
         goal = [self.target_postion.x,self.target_postion.y]
         path = self.planner(origin,goal,self.obsticals,0)
+        self.planned_path = path
         first_segment = [path[0],path[1]]
         vx = first_segment[1][0] - first_segment[0][0]
         vy = first_segment[1][1] - first_segment[0][1]
@@ -90,8 +92,10 @@ class Robot:
         d = self.distance_to_point(goal)
         print("path :{0}\nWorld Velocity:{1} Local Velocity:{2}".format(first_segment,[vx,vy],[lvxu * d,lvyu * d]))
         print("Computed path : {0}".format(path))
-        self.veltangent = final_v[0] + lvxu * d
-        self.velnormal = final_v[0]  + lvyu * d
+        vfx = abs(final_v[0] + lvxu * d) > self.max_velocity if self.max_velocity else final_v[0] + lvxu * d
+        vfy = abs(final_v[1]  + lvyu * d) > self.max_velocity if self.max_velocity else final_v[1]  + lvyu * d
+        self.veltangent = vfx
+        self.velnormal = vfy
 
 
     def local_to_world(self,vec):
