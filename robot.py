@@ -22,8 +22,8 @@ class Robot:
     obsticals = []
     planned_path = []
     current_path_segment = []
-    target_postion = Position(0, 0)
-    target_velocity = [0,0]
+    target_postion = Position(None, 0)
+    target_velocity = [None,0]
     current_state = None
     next_state = None
     next_sub_state = None
@@ -49,9 +49,9 @@ class Robot:
 
     def update(self):
         # is robot on path ??
-        self.target_postion.x = self.ball.x
-        self.target_postion.y = self.ball.y
-        if self.robotID == 2:
+        #self.target_postion.x = self.ball.x
+        #self.target_postion.y = self.ball.y
+        if self.target_postion.x != None and self.target_velocity[0] != None:
             self.move_to()
         # re-adjust velocities
         #self.do_command(self.commands)
