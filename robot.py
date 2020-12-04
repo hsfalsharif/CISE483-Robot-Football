@@ -1,6 +1,6 @@
 from Commands import CMD
 from position import Position
-from math import  sqrt,cos,sin
+from math import  sqrt,cos,sin,copysign
 
 class Robot:
     robotID = 0
@@ -21,16 +21,18 @@ class Robot:
     commands = []
     obsticals = []
     planned_path = []
-    max_velocity = 0.25
+    max_velocity = 0.2
     current_path_segment = []
     target_postion = Position(0, 0)
     target_velocity = [0,0]
     current_state = None
+    current_sub_state = None
     next_state = None
     next_sub_state = None
     R0 = None
     R1 = None
     R2 = None
+    global_velocity = [0,0]
 
 
     def set_parameter(self, robot_id, position):
@@ -77,27 +79,35 @@ class Robot:
 
 
     def move_to(self):
-        origin = [self.position.x,self.position.y]
+        origin = [self.position.x + self.global_velocity[0]*0.018,self.position.y+self.global_velocity[1]*0.018]
         goal = [self.target_postion.x,self.target_postion.y]
         path = self.planner(origin,goal,self.obsticals,0)
         self.planned_path = path
         first_segment = [path[0],path[1]]
         vx = first_segment[1][0] - first_segment[0][0]
         vy = first_segment[1][1] - first_segment[0][1]
+        
+        magnitude = self.vector_mag([vx,vy])
+        vx = self.safe_division(vx,magnitude)
+        vy = self.safe_division(vy,magnitude)
+        self.global_velocity = [vx,vy]
         lv = self.world_to_local([vx,vy])
-        final_v = self.world_to_local(self.target_velocity)
-        magnitude = self.vector_mag(lv)
-        lvyu = self.safe_division(lv[1],magnitude)
-        lvxu = self.safe_division(lv[0],magnitude)
+
         d = self.distance_to_point(goal)
-        print("path :{0}\nWorld Velocity:{1} Local Velocity:{2}".format(first_segment,[vx,vy],[lvxu * d,lvyu * d]))
-        print("Computed path : {0}".format(path))
-        vfx = abs(final_v[0] + lvxu * d) > self.max_velocity if self.max_velocity else final_v[0] + lvxu * d
-        vfy = abs(final_v[1]  + lvyu * d) > self.max_velocity if self.max_velocity else final_v[1]  + lvyu * d
-        self.veltangent = vfx
-        self.velnormal = vfy
 
 
+        vfx = lv[0] * d
+        vfy = lv[1] * d
+        
+        self.veltangent = self.clamp(vfx,self.max_velocity)
+        self.velnormal = self.clamp(vfy,self.max_velocity)
+
+    def clamp(self,x, mx):
+        if abs(x) > mx:
+            return copysign(mx,x)
+        return x
+
+        
     def local_to_world(self,vec):
         o = self.orientation
         vx = vec[0]*cos(o) - vec[1]*sin(o)
@@ -149,7 +159,6 @@ class Robot:
         if distance < r :
             return True
         
-        
         return False
 
     def safe_division(self,n, d):
@@ -180,9 +189,13 @@ class Robot:
         #vy = y1-y3
         #if vy == 0:
         vy = pb - yi
+        if vy == 0 :
+            vy =(xi+10)*pm 
+        
         mag = sqrt(vx**2 + vy**2)
         vx /= mag
         vy /= mag
+
         #print("point of intersection is {0} ".format([xi,yi]))
         
         xsg = xi + margin * vx
@@ -195,7 +208,7 @@ class Robot:
             if o[0] == self.position.x and o[1] == self.position.y:
                 continue
             if self.overlap(l,o):
-                print("get_obstical : line ({0},{1}),({2},{3}) overlap with ({4},{5})".format(l[0][0],l[0][1],l[1][0],l[1][1],o[0],o[1]))
+                #print("get_obstical : line ({0},{1}),({2},{3}) overlap with ({4},{5})".format(l[0][0],l[0][1],l[1][0],l[1][1],o[0],o[1]))
                 return o
         else: return None
         
@@ -205,8 +218,7 @@ class Robot:
         line = [[s[0],s[1]],[g[0],g[1]]]
         obstical = self.get_obsticals(line,env) 
         if obstical and i < 50 :
-            sub_goal = self.get_sub_goal(line,obstical,0.5)
-            #print("Create sub-goal at {0} to avoid {1}".format(sub_goal,obstical))
+            sub_goal = self.get_sub_goal(line,obstical,0.3)
         # add_sub_goal(sub_goal)
             path_part1 = self.planner(s,sub_goal,env,i+1)
             
@@ -217,6 +229,7 @@ class Robot:
                     path_part1.append(p)
                 
             return path_part1
-        path = [s,g]
-        return path
+        else :
+            path = [s,g]
+            return path
         
