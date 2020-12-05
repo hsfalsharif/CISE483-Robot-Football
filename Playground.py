@@ -25,9 +25,9 @@ class Playground:
     height = 0
 
     def __init__(self):
-        imgui.create_context()
-        self.window = self.impl_glfw_init()
-        self.impl = GlfwRenderer(self.window)
+        # imgui.create_context()
+        # self.window = self.impl_glfw_init()
+        # self.impl = GlfwRenderer(self.window)
 
         for i in range(8):
             self.robotBlue.append(Robot(i, Position(0, 0)))
@@ -102,7 +102,7 @@ class Playground:
         next_command_b = SPacket(0, 0, self.robotBlue)
         self.net.send_packet(next_command_b)
 
-        self.render_gui()
+        # self.render_gui()
 
     def render_gui(self):
         if glfw.window_should_close(self.window):
