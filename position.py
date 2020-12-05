@@ -4,4 +4,4 @@ class Position:
 		self.y = y
 
 	def to_string(self):
-		return "Position :({0} , {1})".format(self.y, self.x)
+		return "Position :({0} , {1})".format(self.x, self.y)

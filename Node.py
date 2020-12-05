@@ -1,9 +1,9 @@
 class Node:
     visited = False
 
-    def __init__(self, position, neighbours):
+    def __init__(self, position, parent):
         self.position = position
-        self.neighbours = neighbours
+        self.parent = parent
 
     def to_string(self):
-        return "Position :({0} , {1})\nNeighbours: {2}".format(self.position.y, self.position.x, self.neighbours)
+        return "Position :({0} , {1})".format(self.position.x, self.position.y)

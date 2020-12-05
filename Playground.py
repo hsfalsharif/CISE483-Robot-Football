@@ -25,9 +25,9 @@ class Playground:
     height = 0
 
     def __init__(self):
-        # imgui.create_context()
-        # self.window = self.impl_glfw_init()
-        # self.impl = GlfwRenderer(self.window)
+        imgui.create_context()
+        self.window = self.impl_glfw_init()
+        self.impl = GlfwRenderer(self.window)
 
         for i in range(8):
             self.robotBlue.append(Robot(i, Position(0, 0)))
@@ -85,10 +85,10 @@ class Playground:
         self.robotYellow[0].set_cmd(cmd)
 
         for i in self.robotYellow:
-            i.update()
+            i.update(self)
 
-        for i in self.robotBlue:
-            i.update()
+        # for i in self.robotBlue:
+        #    i.update(self)
 
         # we send each team commands to the simulator so the robots will move after this block
         # according to the protocol we send each team command packet alone
@@ -305,28 +305,28 @@ class Playground:
             r = 0.0793 * pixel_to_meter
             draw_list.add_circle_filled(y, x, r, imgui.get_color_u32_rgba(1, 1, 0, 1))
 
-            for l in range(len(i.planned_path) - 1):
-                x0, y0 = yc + i.planned_path[l][0] * pixel_to_meter, xc + i.planned_path[l][1] * pixel_to_meter
-                x1, y1 = yc + i.planned_path[l + 1][0] * pixel_to_meter, xc + i.planned_path[l + 1][1] * pixel_to_meter
+            for l in i.planned_path:
+                x0, y0 = yc + l[0][0] * pixel_to_meter, xc + l[0][1] * pixel_to_meter
+                x1, y1 = yc + l[1][0] * pixel_to_meter, xc + l[1][1] * pixel_to_meter
                 draw_list.add_line(y0, x0, y1, x1, imgui.get_color_u32_rgba(1, 1, 0, 1), 2)
 
             vx = x + i.global_velocity[0] * pixel_to_meter / 10
             vy = y + i.global_velocity[1] * pixel_to_meter / 10
             draw_list.add_line(y, x, vy, vx, imgui.get_color_u32_rgba(1, 1, 1, 1), 2)
 
-        for i in self.robotBlue:
-            x, y = yc + i.position.x * pixel_to_meter, xc + i.position.y * pixel_to_meter
-            r = 0.0793 * pixel_to_meter
-            draw_list.add_circle_filled(y, x, r, imgui.get_color_u32_rgba(0, 0, 1, 1))
-
-            for l in range(len(i.planned_path) - 1):
-                x0, y0 = yc + i.planned_path[l][0] * pixel_to_meter, xc + i.planned_path[l][1] * pixel_to_meter
-                x1, y1 = yc + i.planned_path[l + 1][0] * pixel_to_meter, xc + i.planned_path[l + 1][1] * pixel_to_meter
-                draw_list.add_line(y0, x0, y1, x1, imgui.get_color_u32_rgba(0, 0, 1, 1), 2)
-
-            vx = x + i.global_velocity[0] * pixel_to_meter / 10
-            vy = y + i.global_velocity[1] * pixel_to_meter / 10
-            draw_list.add_line(y, x, vy, vx, imgui.get_color_u32_rgba(1, 1, 1, 1), 2)
+        # for i in self.robotBlue:
+        #    x, y = yc + i.position.x * pixel_to_meter, xc + i.position.y * pixel_to_meter
+        #    r = 0.0793 * pixel_to_meter
+        #    draw_list.add_circle_filled(y, x, r, imgui.get_color_u32_rgba(0, 0, 1, 1))
+        #
+        #    for l in i.planned_path:
+        #        x0, y0 = yc + l[0][0] * pixel_to_meter, xc + l[0][1] * pixel_to_meter
+        #        x1, y1 = yc + l[1][0] * pixel_to_meter, xc + l[1][1] * pixel_to_meter
+        #        draw_list.add_line(y0, x0, y1, x1, imgui.get_color_u32_rgba(0, 0, 1, 1), 2)
+        #
+        #    vx = x + i.global_velocity[0] * pixel_to_meter / 10
+        #    vy = y + i.global_velocity[1] * pixel_to_meter / 10
+        #    draw_list.add_line(y, x, vy, vx, imgui.get_color_u32_rgba(1, 1, 1, 1), 2)
 
         if imgui.is_mouse_hovering_rect(xo, yo, xo + imgui.get_window_width(), yo + imgui.get_window_height()):
             imgui.set_tooltip("({0},{1})".format((imgui.get_mouse_pos()[0] - xc) / pixel_to_meter,
