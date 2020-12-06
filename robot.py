@@ -67,6 +67,7 @@ class Robot:
         self.target_position.y = self.ball.y
         if self.robotID == 2 and self.target_position.x is not None:
             self.move_to_RRT(Playground)  # move_to or move_to_RRT
+            # print(self.position.to_string())
         # re-adjust velocities
         # self.do_command(self.commands)
 
@@ -92,15 +93,17 @@ class Robot:
         start = Position(self.position.x + self.global_velocity[0] * 0.018,
                          self.position.y + self.global_velocity[1] * 0.018)
         goal = Position(self.target_position.x, self.target_position.y)
-        tree = [Node(start, None)]  # Not in the same format specified, could cause problems
-        path = self.RRT(tree, goal, Playground)
+
+        path = self.RRT(start, goal, Playground)
         # print(len(path))
         # self.planned_path = path
         print(path)
-        first_segment = [path[0], path[1]]
+        first_segment = path[0]
+        # print(first_segment)
         vx = first_segment[1][0] - first_segment[0][0]
         vy = first_segment[1][1] - first_segment[0][1]
-
+        print("Simulator: ({0}, {1}) -> ({2}, {3})".format(first_segment[0][0], first_segment[0][1],
+                                                           first_segment[1][1], first_segment[0][1]))
         magnitude = self.vector_mag([vx, vy])
         vx = self.safe_division(vx, magnitude)
         vy = self.safe_division(vy, magnitude)
@@ -115,14 +118,14 @@ class Robot:
         self.veltangent = self.clamp(vfx, self.max_velocity)
         self.velnormal = self.clamp(vfy, self.max_velocity)
 
-    def RRT(self, tree, goal, Playground):  # how to check for obstacles here?
-
+    def RRT(self, start, goal, Playground):  # how to check for obstacles here?
+        tree = [Node(start, None)]
         # print([random_position.x,random_position.y])
         distance_to_goal = np.inf
         # building tree by traversing environment
         while distance_to_goal >= 0.1:
             distance_to_goal = self.extend(tree, goal, Playground)
-            print(distance_to_goal)
+            # print(distance_to_goal)
         # return path by traversing tree
         # for n in tree:
         #    print(n.to_string())
@@ -132,8 +135,8 @@ class Robot:
         current_node = last_node
         while current_node is not None:
             if current_node.parent is not None:
-                path.append([current_node.position.x, current_node.position.y, [current_node.parent.position.x,
-                                                                                current_node.parent.position.y]])
+                path.append([[current_node.position.x, current_node.position.y], [current_node.parent.position.x,
+                                                                                  current_node.parent.position.y]])
             current_node = current_node.parent
         path.reverse()
         return path
@@ -143,7 +146,7 @@ class Robot:
 
     def extend(self, tree, goal, Playground):  # do we need to account for obstacles here? if so, how?
         random.seed(time.time())
-        u = (-1)**(random.randint(1, 2)) * random.random()
+        u = (-1) ** (random.randint(1, 2)) * random.random()
         random_position = Position(u * 12, u * 10)
         # print(random_position.to_string())
         node_index = 0

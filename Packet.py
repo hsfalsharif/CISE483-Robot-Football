@@ -2,7 +2,6 @@ import pythonProto.messages_robocup_ssl_wrapper_pb2 as wrapper
 
 from info import InfoBall, InfoRobot
 
-
 class Packet:
     """docstring for packet"""
     info_ball = InfoBall(0, 0, 0, 0)

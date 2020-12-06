@@ -47,12 +47,14 @@ class Playground:
             self.ball.z = p.info_ball.z
 
         # update Yellow team position and angle
+        # print("*******")
         for i in p.info_robotY:
             if i.confidence > 0.5:
                 self.robotYellow[i.id].position.x = i.x
                 self.robotYellow[i.id].position.y = i.y
                 self.robotYellow[i.id].orientation = i.orientation
                 self.robotYellow[i.id].ball = self.ball
+            #    print("ID: {0}, ({1}, {2})".format(i.id, i.x, i.y))
 
         # update Blue team position and angle
         for i in p.info_robotB:
@@ -76,18 +78,18 @@ class Playground:
         # test sending command to robots
         # new command
 
-        # print(p.frame_number)
-        cmd = CMD()
-        # command description for debugging
-        cmd.des = "point1"
-        cmd.wheel_speed = False
-        cmd.velocity(1, 0, 0)
-        self.robotYellow[0].set_cmd(cmd)
+        # # print(p.frame_number)
+        # cmd = CMD()
+        # # command description for debugging
+        # cmd.des = "point1"
+        # cmd.wheel_speed = False
+        # cmd.velocity(1, 0, 0)
+        # self.robotYellow[0].set_cmd(cmd)
 
         for i in self.robotYellow:
             i.update(self)
 
-        # for i in self.robotBlue:
+        #for i in self.robotBlue:
         #    i.update(self)
 
         # we send each team commands to the simulator so the robots will move after this block
@@ -308,13 +310,14 @@ class Playground:
             for l in i.planned_path:
                 x0, y0 = yc + l[0][0] * pixel_to_meter, xc + l[0][1] * pixel_to_meter
                 x1, y1 = yc + l[1][0] * pixel_to_meter, xc + l[1][1] * pixel_to_meter
+                # print("GUI: ({0}, {1}) -> ({2}, {3})".format(l[0][0], l[0][1], l[1][0], l[1][1]))
                 draw_list.add_line(y0, x0, y1, x1, imgui.get_color_u32_rgba(1, 1, 0, 1), 2)
 
             vx = x + i.global_velocity[0] * pixel_to_meter / 10
             vy = y + i.global_velocity[1] * pixel_to_meter / 10
             draw_list.add_line(y, x, vy, vx, imgui.get_color_u32_rgba(1, 1, 1, 1), 2)
 
-        # for i in self.robotBlue:
+        #for i in self.robotBlue:
         #    x, y = yc + i.position.x * pixel_to_meter, xc + i.position.y * pixel_to_meter
         #    r = 0.0793 * pixel_to_meter
         #    draw_list.add_circle_filled(y, x, r, imgui.get_color_u32_rgba(0, 0, 1, 1))
