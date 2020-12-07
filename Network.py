@@ -4,7 +4,7 @@ import struct
 from Packet import Packet
 import pythonProto.grSim_Packet_pb2 as grSim_Packet_pb2
 import pythonProto.grSim_Commands_pb2 as grSim_Commands_pb2
-
+import os,fcntl ,sys,errno
 
 class Network:
 
@@ -23,15 +23,31 @@ class Network:
 		mreq = struct.pack("4sl", socket.inet_aton(self.MCAST_GRP), socket.INADDR_ANY)
 
 		sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
+		fcntl.fcntl(sock, fcntl.F_SETFL, os.O_NONBLOCK)
+
 		self.sock = sock
 
 	def receive_data(self):
 		self.p = Packet(self.sock.recv(65536))
 		self.p.add(self.sock.recv(65536))
 
-	def update(self):
-		self.p = Packet(self.sock.recv(65536))
-		self.p.add(self.sock.recv(65536))
+	def update(self):		
+		while True:
+			try:
+				self.p = Packet(self.sock.recv(65536))
+				self.p.add(self.sock.recv(65536))		
+			except socket.error as e:
+				err = e.args[0]
+				if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
+					#sleep(1)
+					#print('newest data captured  ...')
+					break
+				else:
+					# a "real" error occurred
+					print(e)
+					sys.exit(1)
+			
+			
 
 	def get_packet(self):
 		return self.p
