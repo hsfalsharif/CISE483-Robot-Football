@@ -34,13 +34,18 @@ class Network:
 	def update(self):		
 		while True:
 			try:
-				self.p = Packet(self.sock.recv(65536))
-				self.p.add(self.sock.recv(65536))		
+				x = self.sock.recv(65536)
+				y = self.sock.recv(65536)
+				x0 = x
+				y0 = y
+				self.p = Packet(x0)
+				self.p.add(y0)		
 			except socket.error as e:
 				err = e.args[0]
 				if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
 					#sleep(1)
 					#print('newest data captured  ...')
+					#print("packet size is ", len(x0), " " , len(y0))
 					break
 				else:
 					# a "real" error occurred

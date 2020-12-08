@@ -6,7 +6,7 @@ from Packet import SPacket
 from Commands import CMD
 import glfw
 import OpenGL.GL as gl
-
+import threading
 import imgui
 from imgui.integrations.glfw import GlfwRenderer
 
@@ -25,9 +25,8 @@ class Playground:
     height = 0
 
     def __init__(self):
-        imgui.create_context()
-        self.window = self.impl_glfw_init()
-        self.impl = GlfwRenderer(self.window)
+        
+        threading.Thread(target=self.render_gui,args=(self,)).start()
 
         for i in range(8):
             self.robotBlue.append(Robot(i, Position(0, 0)))
@@ -36,34 +35,39 @@ class Playground:
             self.robotYellow.append(Robot(i, Position(0, 0)))
 
     def update(self):
+        #print("update")
+
         # receive new packet
         self.net.update()
         p = self.net.get_packet()
         # print(p.to_string())
         # update ball position
-        if p.info_ball.confidence > 0.5:
-            self.ball.x = p.info_ball.x
-            self.ball.y = p.info_ball.y
-            self.ball.z = p.info_ball.z
+        try:
+            if p.info_ball.confidence > 0.5:
+                self.ball.x = p.info_ball.x
+                self.ball.y = p.info_ball.y
+                self.ball.z = p.info_ball.z
 
-        # update Yellow team position and angle
-        # print("*******")
-        for i in p.info_robotY:
-            if i.confidence > 0.5:
-                self.robotYellow[i.id].position.x = i.x
-                self.robotYellow[i.id].position.y = i.y
-                self.robotYellow[i.id].orientation = i.orientation
-                self.robotYellow[i.id].ball = self.ball
-            #    print("ID: {0}, ({1}, {2})".format(i.id, i.x, i.y))
+            # update Yellow team position and angle
+            # print("*******")
+            for i in p.info_robotY:
+                if i.confidence > 0.5:
+                    self.robotYellow[i.id].position.x = i.x
+                    self.robotYellow[i.id].position.y = i.y
+                    self.robotYellow[i.id].orientation = i.orientation
+                    self.robotYellow[i.id].ball = self.ball
+                #    print("ID: {0}, ({1}, {2})".format(i.id, i.x, i.y))
 
-        # update Blue team position and angle
-        for i in p.info_robotB:
-            if i.confidence > 0.5:
-                self.robotBlue[i.id].position.x = i.x
-                self.robotBlue[i.id].position.y = i.y
-                self.robotBlue[i.id].orientation = i.orientation
-                self.robotBlue[i.id].ball = self.ball
+            # update Blue team position and angle
+            for i in p.info_robotB:
+                if i.confidence > 0.5:
+                    self.robotBlue[i.id].position.x = i.x
+                    self.robotBlue[i.id].position.y = i.y
+                    self.robotBlue[i.id].orientation = i.orientation
+                    self.robotBlue[i.id].ball = self.ball
 
+        except:
+            print("[*] Error reading packet")
         self.obstacles = []
         for i in self.robotYellow:
             self.obstacles.append([i.position.x, i.position.y, 0.0875 * 2])
@@ -73,7 +77,6 @@ class Playground:
             r.obstacles = self.obstacles
         for r in self.robotBlue:
             r.obstacles = self.obstacles
-
         ####
         # test sending command to robots
         # new command
@@ -104,17 +107,23 @@ class Playground:
         next_command_b = SPacket(0, 0, self.robotBlue)
         self.net.send_packet(next_command_b)
 
-        # self.render_gui()
 
-    def render_gui(self):
+    def init_gui(self):
+        imgui.create_context()
+        self.window = self.impl_glfw_init()
+        self.impl = GlfwRenderer(self.window)
+
+
+    def update_gui(self,pl):
         if glfw.window_should_close(self.window):
             self.impl.shutdown()
             glfw.terminate()
-
+        
         glfw.poll_events()
         self.impl.process_inputs()
         imgui.new_frame()
-
+        #print(self.ball.x)
+        #print(self.robotYellow[0].position.x)
         self.render_map()
         self.render_info()
 
@@ -123,6 +132,17 @@ class Playground:
         imgui.render()
         self.impl.render(imgui.get_draw_data())
         glfw.swap_buffers(self.window)
+
+
+    def render_gui(self,pl):
+        self.init_gui()
+        while True:
+           # print("thread {0}".format(self))
+            self.update_gui(pl)
+
+
+
+
 
     def render_info(self):
 
@@ -297,19 +317,21 @@ class Playground:
         draw_list.add_line(x22, y22, x23, y23, imgui.get_color_u32_rgba(1, 1, 1, 1), lw)
 
         # draw ball
-        bx, by = yc + self.ball.x * pixel_to_meter, xc + self.ball.y * pixel_to_meter
-        r = 0.0215000000 * pixel_to_meter
-        draw_list.add_circle_filled(by, bx, r, imgui.get_color_u32_rgba(1, 0, 0, 1))
-
+        try:
+            bx, by = yc - self.ball.x * pixel_to_meter, xc - self.ball.y * pixel_to_meter
+            r = 0.0215000000 * pixel_to_meter
+            draw_list.add_circle_filled(by, bx, r, imgui.get_color_u32_rgba(1, 0, 0, 1))
+        except:
+           pass# print("[*] Error drawing ball")
         # draw robots
         for i in self.robotYellow:
-            x, y = yc + i.position.x * pixel_to_meter, xc + i.position.y * pixel_to_meter
+            x, y = yc - i.position.x * pixel_to_meter, xc - i.position.y * pixel_to_meter
             r = 0.0793 * pixel_to_meter
             draw_list.add_circle_filled(y, x, r, imgui.get_color_u32_rgba(1, 1, 0, 1))
 
             for l in i.planned_path:
-                x0, y0 = yc + l[0][0] * pixel_to_meter, xc + l[0][1] * pixel_to_meter
-                x1, y1 = yc + l[1][0] * pixel_to_meter, xc + l[1][1] * pixel_to_meter
+                x0, y0 = yc - l[0][0] * pixel_to_meter, xc - l[0][1] * pixel_to_meter
+                x1, y1 = yc - l[1][0] * pixel_to_meter, xc - l[1][1] * pixel_to_meter
                 # print("GUI: ({0}, {1}) -> ({2}, {3})".format(l[0][0], l[0][1], l[1][0], l[1][1]))
                 draw_list.add_line(y0, x0, y1, x1, imgui.get_color_u32_rgba(1, 1, 0, 1), 2)
 
@@ -317,19 +339,19 @@ class Playground:
             vy = y + i.global_velocity[1] * pixel_to_meter / 10
             draw_list.add_line(y, x, vy, vx, imgui.get_color_u32_rgba(1, 1, 1, 1), 2)
 
-        #for i in self.robotBlue:
-        #    x, y = yc + i.position.x * pixel_to_meter, xc + i.position.y * pixel_to_meter
-        #    r = 0.0793 * pixel_to_meter
-        #    draw_list.add_circle_filled(y, x, r, imgui.get_color_u32_rgba(0, 0, 1, 1))
-        #
-        #    for l in i.planned_path:
-        #        x0, y0 = yc + l[0][0] * pixel_to_meter, xc + l[0][1] * pixel_to_meter
-        #        x1, y1 = yc + l[1][0] * pixel_to_meter, xc + l[1][1] * pixel_to_meter
-        #        draw_list.add_line(y0, x0, y1, x1, imgui.get_color_u32_rgba(0, 0, 1, 1), 2)
-        #
-        #    vx = x + i.global_velocity[0] * pixel_to_meter / 10
-        #    vy = y + i.global_velocity[1] * pixel_to_meter / 10
-        #    draw_list.add_line(y, x, vy, vx, imgui.get_color_u32_rgba(1, 1, 1, 1), 2)
+        for i in self.robotBlue:
+            x, y = yc - i.position.x * pixel_to_meter, xc - i.position.y * pixel_to_meter
+            r = 0.0793 * pixel_to_meter
+            draw_list.add_circle_filled(y, x, r, imgui.get_color_u32_rgba(0, 0, 1, 1))
+        
+            for l in i.planned_path:
+                x0, y0 = yc - l[0][0] * pixel_to_meter, xc - l[0][1] * pixel_to_meter
+                x1, y1 = yc - l[1][0] * pixel_to_meter, xc - l[1][1] * pixel_to_meter
+                draw_list.add_line(y0, x0, y1, x1, imgui.get_color_u32_rgba(0, 0, 1, 1), 2)
+        
+            vx = x + i.global_velocity[0] * pixel_to_meter / 10
+            vy = y + i.global_velocity[1] * pixel_to_meter / 10
+            draw_list.add_line(y, x, vy, vx, imgui.get_color_u32_rgba(1, 1, 1, 1), 2)
 
         if imgui.is_mouse_hovering_rect(xo, yo, xo + imgui.get_window_width(), yo + imgui.get_window_height()):
             imgui.set_tooltip("({0},{1})".format((imgui.get_mouse_pos()[0] - xc) / pixel_to_meter,

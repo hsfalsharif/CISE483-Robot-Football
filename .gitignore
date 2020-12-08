@@ -1,0 +1,16 @@
+.vscode/settings.json
+__pycache__/ball.cpython-38.pyc
+__pycache__/Commands.cpython-38.pyc
+__pycache__/info.cpython-38.pyc
+__pycache__/Network.cpython-38.pyc
+__pycache__/Node.cpython-38.pyc
+__pycache__/Packet.cpython-38.pyc
+__pycache__/Playground.cpython-38.pyc
+__pycache__/position.cpython-38.pyc
+__pycache__/robot.cpython-38.pyc
+pythonProto/__pycache__/grSim_Commands_pb2.cpython-38.pyc
+pythonProto/__pycache__/grSim_Packet_pb2.cpython-38.pyc
+pythonProto/__pycache__/grSim_Replacement_pb2.cpython-38.pyc
+pythonProto/__pycache__/messages_robocup_ssl_detection_pb2.cpython-38.pyc
+pythonProto/__pycache__/messages_robocup_ssl_geometry_pb2.cpython-38.pyc
+pythonProto/__pycache__/messages_robocup_ssl_wrapper_pb2.cpython-38.pyc

@@ -66,7 +66,7 @@ class Robot:
         self.target_position.x = self.ball.x
         self.target_position.y = self.ball.y
         if self.robotID == 2 and self.target_position.x is not None:
-            self.move_to_RRT(Playground)  # move_to or move_to_RRT
+            self.move_to()  # move_to or move_to_RRT
             # print(self.position.to_string())
         # re-adjust velocities
         # self.do_command(self.commands)
@@ -97,7 +97,7 @@ class Robot:
         path = self.RRT(start, goal, Playground)
         # print(len(path))
         # self.planned_path = path
-        print(path)
+        #print(path)
         first_segment = path[0]
         # print(first_segment)
         vx = first_segment[1][0] - first_segment[0][0]
@@ -123,7 +123,7 @@ class Robot:
         # print([random_position.x,random_position.y])
         distance_to_goal = np.inf
         # building tree by traversing environment
-        while distance_to_goal >= 0.1:
+        while distance_to_goal >= 100:
             distance_to_goal = self.extend(tree, goal, Playground)
             # print(distance_to_goal)
         # return path by traversing tree
@@ -166,14 +166,14 @@ class Robot:
         # print(vector)
         vector_mag = sqrt(vector[0] ** 2 + vector[1] ** 2)
         unit_vector = [vector[0] / vector_mag, vector[1] / vector_mag]
-        new_node = Node(Position(nearest_node.position.x + 0.001 * unit_vector[0],
-                                 nearest_node.position.y + 0.001 * unit_vector[1]),
+        new_node = Node(Position(nearest_node.position.x + 0.01 * unit_vector[0],
+                                 nearest_node.position.y + 0.01 * unit_vector[1]),
                         nearest_node)  # 0.3 is incrementation margin
         tree.append(new_node)  # adding new node to the tree
         self.planned_path.append([[nearest_node.position.x, nearest_node.position.y],
                                   [new_node.position.x, new_node.position.y]])
         # print(self.planned_path)
-        Playground.render_gui()
+        Playground.update_gui()
         distance_to_goal = sqrt((new_node.position.x - goal.x) ** 2 +
                                 (new_node.position.y - goal.y) ** 2)
         return distance_to_goal
@@ -187,7 +187,12 @@ class Robot:
         origin = [self.position.x + self.global_velocity[0] * 0.018, self.position.y + self.global_velocity[1] * 0.018]
         goal = [self.target_position.x, self.target_position.y]
         path = self.planner(origin, goal, self.obstacles, 0)
-        # self.planned_path = path
+        guipath = []
+        for i in range(len(path)-1):
+            guipath.append([path[i],path[i+1]])
+
+        
+        self.planned_path = guipath
         first_segment = [path[0], path[1]]
         vx = first_segment[1][0] - first_segment[0][0]
         vy = first_segment[1][1] - first_segment[0][1]
