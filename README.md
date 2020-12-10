@@ -169,7 +169,7 @@ will explain these functions and the use of each function.
 
 ![](stox.gif)
 ![](stox2.gif)
-![](demo.gif )
+![](demo_1.gif )
 ![](smal_grow_rrt.gif)
 ![](rrt_1.gif )
 ![](multipath.gif)
