@@ -1,6 +1,12 @@
+import random
+import time
+from math import sqrt, cos, sin, copysign
+
+import numpy as np
+
 from Commands import CMD
+from Node import Node
 from position import Position
-from math import sqrt, cos, sin
 
 
 class Robot:
@@ -22,15 +28,28 @@ class Robot:
     commands = []
     obstacles = []
     planned_path = []
+    max_velocity = 0.2
     current_path_segment = []
+<<<<<<< HEAD
+    target_position = Position(0, 0)
+    target_velocity = [0, 0]
+=======
     target_position = Position(None, 0)
     target_velocity = [None, 0]
+>>>>>>> main
     current_state = None
+    current_sub_state = None
     next_state = None
     next_sub_state = None
     R0 = None
     R1 = None
     R2 = None
+<<<<<<< HEAD
+    global_velocity = [0, 0]
+    window = None
+    impl = None
+=======
+>>>>>>> main
 
     def set_parameter(self, robot_id, position):
         self.robotID = robot_id
@@ -40,6 +59,9 @@ class Robot:
         self.robotID = robot_id
         self.position = position
         self.commands = CMD()
+        # imgui.create_context()
+        # self.window = self.impl_glfw_init()
+        # self.impl = GlfwRenderer(self.window)
 
     def set_cmd(self, cmd):
         self.commands = cmd
@@ -47,12 +69,20 @@ class Robot:
     def do_now(self, cmd):
         self.do_command(cmd)
 
-    def update(self):
+    def update(self, Playground):
         # is robot on path ??
+<<<<<<< HEAD
+        self.target_position.x = self.ball.x
+        self.target_position.y = self.ball.y
+        if self.robotID == 2 and self.target_position.x is not None:
+            self.move_to()# move_to or move_to_RRT
+            # print(self.position.to_string())
+=======
         # self.target_position.x = self.ball.x
         # self.target_position.y = self.ball.y
         if self.target_position.x is not None and self.target_velocity[0] is not None:
             self.move_to()
+>>>>>>> main
         # re-adjust velocities
         # self.do_command(self.commands)
 
@@ -74,6 +104,134 @@ class Robot:
                                                               self.spinner, self.wheelsspeed, self.wheel1, self.wheel2,
                                                               self.wheel3, self.wheel4)
 
+<<<<<<< HEAD
+    def move_to_RRT(self, Playground):  # start, goal and obstacles are all positions
+        start = Position(self.position.x + self.global_velocity[0] * 0.018,
+                         self.position.y + self.global_velocity[1] * 0.018)
+        goal = Position(self.target_position.x, self.target_position.y)
+
+        path = self.RRT(start, goal, Playground)
+        # print(len(path))
+        # self.planned_path = path
+        #print(path)
+        first_segment = path[0]
+        # print(first_segment)
+        vx = first_segment[1][0] - first_segment[0][0]
+        vy = first_segment[1][1] - first_segment[0][1]
+        #print("Simulator: ({0}, {1}) -> ({2}, {3})".format(first_segment[0][0], first_segment[0][1],first_segment[1][1], first_segment[0][1]))
+        magnitude = self.vector_mag([vx, vy])
+        vx = self.safe_division(vx, magnitude)
+        vy = self.safe_division(vy, magnitude)
+        self.global_velocity = [vx, vy]
+        lv = self.world_to_local([vx, vy])
+
+        d = self.distance_to_point([goal.x, goal.y])
+
+        vfx = lv[0] * d
+        vfy = lv[1] * d
+
+        self.veltangent = self.clamp(vfx, self.max_velocity)
+        self.velnormal = self.clamp(vfy, self.max_velocity)
+
+    def RRT(self, start, goal, Playground):  # how to check for obstacles here?
+        tree = [Node(start, None)]
+        # print([random_position.x,random_position.y])
+        distance_to_goal = np.inf
+        # building tree by traversing environment
+        while distance_to_goal >= 100:
+            distance_to_goal = self.extend(tree, goal, Playground)
+            # print(distance_to_goal)
+        # return path by traversing tree
+        # for n in tree:
+        #    print(n.to_string())
+        last_node = tree[len(tree) - 1]  # indicates the final position in the path
+        path = [[[last_node.position.x - 0.00001, last_node.position.y - 0.00001],
+                 [last_node.position.x, last_node.position.y]]]
+        current_node = last_node
+        while current_node is not None:
+            if current_node.parent is not None:
+                path.append([[current_node.position.x, current_node.position.y], [current_node.parent.position.x,
+                                                                                  current_node.parent.position.y]])
+            current_node = current_node.parent
+        path.reverse()
+        return path
+        #  traverse all paths until the final node is reached
+        #  if paths lead to dead ends, eliminate them
+        #  keep the path that leads us to the goal
+
+    def extend(self, tree, goal, Playground):  # do we need to account for obstacles here? if so, how?
+        random.seed(time.time())
+        u = (-1) ** (random.randint(1, 2)) * random.random()
+        random_position = Position(u * 12, u * 10)
+        # print(random_position.to_string())
+        node_index = 0
+        smallest_distance = np.inf
+        nearest_node = Node(Position(np.inf, np.inf), None)
+        for i in range(len(tree)):
+            # print(tree[i])
+            distance = sqrt(
+                (tree[i].position.x - goal.x) ** 2 + (tree[i].position.y - goal.y) ** 2)
+            if distance < smallest_distance:
+                smallest_distance = distance
+                # print(smallest_distance)
+                nearest_node = tree[i]
+                node_index = i
+
+        vector = [random_position.x - nearest_node.position.x, random_position.y - nearest_node.position.y]
+        # print(vector)
+        vector_mag = sqrt(vector[0] ** 2 + vector[1] ** 2)
+        unit_vector = [vector[0] / vector_mag, vector[1] / vector_mag]
+        new_node = Node(Position(nearest_node.position.x + 0.01 * unit_vector[0],
+                                 nearest_node.position.y + 0.01 * unit_vector[1]),
+                        nearest_node)  # 0.3 is incrementation margin
+        tree.append(new_node)  # adding new node to the tree
+        self.planned_path.append([[nearest_node.position.x, nearest_node.position.y],
+                                  [new_node.position.x, new_node.position.y]])
+        #print(self.planned_path)
+        #Playground.update_gui()
+        distance_to_goal = sqrt((new_node.position.x - goal.x) ** 2 +
+                                (new_node.position.y - goal.y) ** 2)
+        return distance_to_goal
+        # need to check if we have reached the goal or not
+        # then if we have reached the goal, I need to return a path from the start node to the goal node by traversing
+        # the tree
+        # also need to assess the real-time operation of this RRT algorithm and whether we need to do it on each from
+        # or not
+
+    def move_to(self):
+        origin = [self.position.x + self.global_velocity[0] * 0.018, self.position.y + self.global_velocity[1] * 0.018]
+        goal = [self.target_position.x, self.target_position.y]
+        path = self.planner(origin, goal, self.obstacles, 0)
+        guipath = []
+        for i in range(len(path)-1):
+            guipath.append([path[i],path[i+1]])
+
+        
+        self.planned_path = guipath
+        first_segment = [path[0], path[1]]
+        vx = first_segment[1][0] - first_segment[0][0]
+        vy = first_segment[1][1] - first_segment[0][1]
+
+        magnitude = self.vector_mag([vx, vy])
+        vx = self.safe_division(vx, magnitude)
+        vy = self.safe_division(vy, magnitude)
+        self.global_velocity = [vx, vy]
+        lv = self.world_to_local([vx, vy])
+
+        d = self.distance_to_point(goal)
+
+        vfx = lv[0] * d
+        vfy = lv[1] * d
+
+        self.veltangent = self.clamp(vfx, self.max_velocity)
+        self.velnormal = self.clamp(vfy, self.max_velocity)
+
+    def clamp(self, x, mx):
+        if abs(x) > mx:
+            return copysign(mx, x)
+        return x
+
+=======
     def move_to(self):
         origin = [self.position.x, self.position.y]
         goal = [self.target_position.x, self.target_position.y]
@@ -92,6 +250,7 @@ class Robot:
         self.veltangent = final_v[0] + lvxu * d
         self.velnormal = final_v[0] + lvyu * d
 
+>>>>>>> main
     def local_to_world(self, vec):
         o = self.orientation
         vx = vec[0] * cos(o) - vec[1] * sin(o)
@@ -130,7 +289,10 @@ class Robot:
         y1 = l[0][1]
         x2 = l[1][0]
         y2 = l[1][1]
+<<<<<<< HEAD
+=======
 
+>>>>>>> main
         min_x = min(x1, x2)
         max_x = max(x1, x2)
         min_y = min(y1, y2)
@@ -171,9 +333,19 @@ class Robot:
         # vy = y1-y3
         # if vy == 0:
         vy = pb - yi
+<<<<<<< HEAD
+        if vy == 0:
+            vy = (xi + 10) * pm
+
         mag = sqrt(vx ** 2 + vy ** 2)
         vx /= mag
         vy /= mag
+
+=======
+        mag = sqrt(vx ** 2 + vy ** 2)
+        vx /= mag
+        vy /= mag
+>>>>>>> main
         # print("point of intersection is {0} ".format([xi,yi]))
 
         xsg = xi + margin * vx
@@ -186,8 +358,13 @@ class Robot:
             if o[0] == self.position.x and o[1] == self.position.y:
                 continue
             if self.overlap(l, o):
+<<<<<<< HEAD
+                # print("get_obstacle : line ({0},{1}),({2},{3}) overlap with ({4},{5})".format(l[0][0],l[0][1],
+                # l[1][0],l[1][1],o[0],o[1]))
+=======
                 print("get_obstacle : line ({0},{1}),({2},{3}) overlap with ({4},{5})".format(l[0][0], l[0][1], l[1][0],
                                                                                               l[1][1], o[0], o[1]))
+>>>>>>> main
                 return o
         else:
             return None
@@ -196,8 +373,12 @@ class Robot:
         line = [[s[0], s[1]], [g[0], g[1]]]
         obstacle = self.get_obstacles(line, env)
         if obstacle and i < 50:
+<<<<<<< HEAD
+            sub_goal = self.get_sub_goal(line, obstacle, 0.3)
+=======
             sub_goal = self.get_sub_goal(line, obstacle, 0.5)
             # print("Create sub-goal at {0} to avoid {1}".format(sub_goal,obstacle))
+>>>>>>> main
             # add_sub_goal(sub_goal)
             path_part1 = self.planner(s, sub_goal, env, i + 1)
 
@@ -208,5 +389,11 @@ class Robot:
                     path_part1.append(p)
 
             return path_part1
+<<<<<<< HEAD
+        else:
+            path = [s, g]
+            return path
+=======
         path = [s, g]
         return path
+>>>>>>> main
