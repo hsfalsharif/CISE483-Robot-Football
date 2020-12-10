@@ -11,6 +11,8 @@
 
 ![](stox.gif)
 ![](stox2.gif)
+![](demo.gif )
+![](smal_grow_rrt.gif)
 ![](rrt_1.gif )
 ![](multipath.gif)
-![](maultipath2.gif)
+![](multipath2.gif)
